@@ -9,7 +9,7 @@ States: `not started`, `in progress`, `done`, `blocked`.
 |-------|----------------------------------------------|-------------|--------|
 | 1     | 01_scaffold.md                               | done        | 3882b11 |
 | 2     | 02_interfaces_and_mock.md                    | done        | ec66cd7 |
-| 3     | 03_camera_and_frame_loop.md                  | done        | TBD    |
+| 3     | 03_camera_and_frame_loop.md                  | done        | c3a7851 |
 | 4     | 04_signals_and_rendering.md                  | not started | —      |
 | 5     | 05_events.md                                 | not started | —      |
 | 6     | 06_tasks_and_export.md                       | not started | —      |
