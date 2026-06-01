@@ -13,7 +13,7 @@ States: `not started`, `in progress`, `done`, `blocked`.
 | 4     | 04_signals_and_rendering.md                  | done        | 8875dde |
 | 5     | 05_events.md                                 | done        | ab9a863 |
 | 6     | 06_tasks_and_export.md                       | done        | 195a585 |
-| 7     | 07_backend_spike.md                          | not started | —      |
+| 7     | 07_backend_spike.md                          | done        | TBD    |
 | 8     | 08_production_backend_and_gaze_mapping.md    | not started | —      |
 | 9     | 09_documentation.md                          | not started | —      |
 
@@ -21,3 +21,10 @@ The `Commit` column holds the short SHA of the commit that marked the phase
 done. For a phase still in progress, leave it as `—`. For a blocked phase, add
 a one-line note in the row below the table explaining what is blocking it and
 which human decision is required.
+
+Phase 7 note: this phase is a throwaway spike plus a decision record
+(`docs-dev/decisions/0001-first-production-backend.md`). The MediaPipe adapter
+is code-split and dev-gated behind `?spike=mediapipe`; it is not wired into the
+default boot path. On-device benchmark numbers
+(`docs-dev/references/phase7-benchmark.md`) are pending and need a human to run
+them on the target devices before Phase 8 is confirmed.
