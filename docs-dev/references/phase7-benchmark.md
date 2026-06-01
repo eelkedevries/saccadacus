@@ -26,6 +26,7 @@ affected by the spike flag.
 - Firefox desktop
 - Chromium desktop
 - Firefox on Android
+- Chrome on Android (additional; measured alongside Firefox on Android)
 
 ## Results
 
