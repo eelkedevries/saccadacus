@@ -46,6 +46,8 @@ const IDX = {
   leftEyeInner: 362,
   leftEyeOuter: 263,
   leftIris: 473,
+  // Nasion (between the eyes) — a stable head/eye centre for centring and head tracking.
+  faceCentre: 168,
 } as const;
 
 /** Convert a normalised image landmark to a y-up participant-frame point. */
@@ -129,9 +131,11 @@ export class MediaPipeFaceLandmarkerBackend implements TrackingBackend {
       ? decomposeHeadPose({ matrix, reliability: 0.9 })
       : undefined;
 
+    const centre = landmarks[IDX.faceCentre];
     const overlayLandmarks = {
       leftEye: overlayEye(landmarks, IDX.leftEyeInner, IDX.leftEyeOuter, IDX.leftIris),
       rightEye: overlayEye(landmarks, IDX.rightEyeOuter, IDX.rightEyeInner, IDX.rightIris),
+      ...(centre ? { faceCentre: { x: centre.x, y: centre.y } } : {}),
     };
 
     return Promise.resolve({

@@ -41,6 +41,7 @@ export function useRealTracking(
     let backend: { processFrame: (f: HTMLCanvasElement, t: number) => Promise<unknown>; dispose: () => Promise<void> } | null =
       null;
     let traces: TracesController | null = null;
+    let videoEl: HTMLVideoElement | null = null;
     let raf = 0;
     let busy = false;
     let bands: EventBand[] = [];
@@ -48,6 +49,12 @@ export function useRealTracking(
     const tracker = new LiveEventTracker();
     const throttle = createAggregateThrottle((s) => useUiStore.getState().applyAggregate(s));
     const captureCanvas = document.createElement('canvas');
+    const constraints = buildCameraConstraints({
+      widthPx: 640,
+      heightPx: 480,
+      frameRateHz: 30,
+      facingMode: 'user',
+    });
 
     const fail = (msg: string): void => {
       if (cancelled) return;
@@ -55,17 +62,43 @@ export function useRealTracking(
       useUiStore.getState().setTrackingStatus('error');
     };
 
+    // Mobile browsers may pause the video or stop the camera track when the
+    // page is backgrounded; on return the feed can be black. Re-play, and if
+    // the track was ended by the OS, re-acquire the stream.
+    const resume = async (): Promise<void> => {
+      if (cancelled || document.visibilityState !== 'visible') return;
+      const video = videoRef.current;
+      if (!video) return;
+      const track = stream?.getVideoTracks()[0];
+      try {
+        if (!stream || !track || track.readyState === 'ended') {
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+          video.srcObject = stream;
+        }
+        if (video.paused) await video.play();
+      } catch {
+        // Leave the last message; the loop resumes if/when the feed recovers.
+      }
+    };
+    const onVisibility = (): void => {
+      void resume();
+    };
+    const onVideoPause = (): void => {
+      void resume();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
     const setup = async (): Promise<void> => {
       try {
         setMessage('Requesting camera permission.');
         useUiStore.getState().setTrackingStatus('preparing');
-        stream = await navigator.mediaDevices.getUserMedia(
-          buildCameraConstraints({ widthPx: 640, heightPx: 480, frameRateHz: 30, facingMode: 'user' }),
-        );
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
         if (cancelled) return;
         const video = videoRef.current;
         if (video) {
+          videoEl = video;
           video.srcObject = stream;
+          video.addEventListener('pause', onVideoPause);
           await video.play();
         }
         const track = stream.getVideoTracks()[0];
@@ -181,6 +214,8 @@ export function useRealTracking(
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
+      document.removeEventListener('visibilitychange', onVisibility);
+      videoEl?.removeEventListener('pause', onVideoPause);
       traces?.destroy();
       if (stream) {
         for (const t of stream.getTracks()) t.stop();

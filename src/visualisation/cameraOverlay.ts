@@ -39,25 +39,40 @@ export function clearOverlay(ctx: CanvasRenderingContext2D, layout: OverlayLayou
   ctx.clearRect(0, 0, layout.widthPx, layout.heightPx);
 }
 
+/** Half-size of the central target box, as a fraction of the frame. */
+const CENTRE_TOLERANCE = 0.18;
+
 export function drawCameraOverlay(
   ctx: CanvasRenderingContext2D,
   result: TrackingFrameResult,
   layout: OverlayLayout,
 ): void {
   clearOverlay(ctx, layout);
-  if (result.overlayLandmarks) {
-    drawLandmarkOverlay(ctx, result.overlayLandmarks, layout);
+  const landmarks = result.overlayLandmarks;
+  if (landmarks) {
+    drawCentringGuide(ctx, layout, landmarks.faceCentre);
+    drawLandmarkOverlay(ctx, landmarks, layout);
+    if (result.headPose && landmarks.faceCentre) {
+      // Anchor the head-pose axes on the head so head tracking follows it.
+      drawHeadAxes(
+        ctx,
+        landmarks.faceCentre.x * layout.widthPx,
+        landmarks.faceCentre.y * layout.heightPx,
+        layout.widthPx * 0.12,
+        result.headPose,
+      );
+    }
   } else {
     drawSchematicOverlay(ctx, result, layout);
-  }
-  if (result.headPose) {
-    drawHeadAxes(
-      ctx,
-      layout.widthPx * 0.5,
-      layout.heightPx * 0.85,
-      layout.widthPx * 0.12,
-      result.headPose,
-    );
+    if (result.headPose) {
+      drawHeadAxes(
+        ctx,
+        layout.widthPx * 0.5,
+        layout.heightPx * 0.85,
+        layout.widthPx * 0.12,
+        result.headPose,
+      );
+    }
   }
   drawReliability(ctx, layout, result.faceReliability);
 }
@@ -69,6 +84,50 @@ function drawLandmarkOverlay(
 ): void {
   if (landmarks.leftEye) drawEyeFromLandmarks(ctx, landmarks.leftEye, layout);
   if (landmarks.rightEye) drawEyeFromLandmarks(ctx, landmarks.rightEye, layout);
+  if (landmarks.faceCentre) {
+    drawFaceCentre(ctx, landmarks.faceCentre, layout);
+  }
+}
+
+/** Central target box and crosshair to help the user keep head and eyes centred. */
+function drawCentringGuide(
+  ctx: CanvasRenderingContext2D,
+  layout: OverlayLayout,
+  faceCentre: { x: number; y: number } | undefined,
+): void {
+  const cx = layout.widthPx * 0.5;
+  const cy = layout.heightPx * 0.5;
+  const halfW = layout.widthPx * CENTRE_TOLERANCE;
+  const halfH = layout.heightPx * CENTRE_TOLERANCE;
+  const centred =
+    faceCentre !== undefined &&
+    Math.abs(faceCentre.x - 0.5) <= CENTRE_TOLERANCE &&
+    Math.abs(faceCentre.y - 0.5) <= CENTRE_TOLERANCE;
+
+  ctx.strokeStyle = centred ? COLOURS.cornerRight : COLOURS.text;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([6, 6]);
+  ctx.strokeRect(cx - halfW, cy - halfH, halfW * 2, halfH * 2);
+  ctx.setLineDash([]);
+}
+
+function drawFaceCentre(
+  ctx: CanvasRenderingContext2D,
+  centre: { x: number; y: number },
+  layout: OverlayLayout,
+): void {
+  const px = centre.x * layout.widthPx;
+  const py = centre.y * layout.heightPx;
+  const centred = Math.abs(centre.x - 0.5) <= CENTRE_TOLERANCE && Math.abs(centre.y - 0.5) <= CENTRE_TOLERANCE;
+  ctx.strokeStyle = centred ? COLOURS.cornerRight : COLOURS.low;
+  ctx.lineWidth = 2;
+  const r = 8;
+  ctx.beginPath();
+  ctx.moveTo(px - r, py);
+  ctx.lineTo(px + r, py);
+  ctx.moveTo(px, py - r);
+  ctx.lineTo(px, py + r);
+  ctx.stroke();
 }
 
 function drawEyeFromLandmarks(
@@ -83,6 +142,9 @@ function drawEyeFromLandmarks(
   const ix = eye.iris.x * layout.widthPx;
   const iy = eye.iris.y * layout.heightPx;
 
+  const eyeWidth = Math.hypot(bx - ax, by - ay);
+
+  // Horizontal eye axis (corner to corner).
   ctx.strokeStyle = COLOURS.eye;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
@@ -100,7 +162,22 @@ function drawEyeFromLandmarks(
   ctx.arc(bx, by, 3, 0, Math.PI * 2);
   ctx.fill();
 
-  const irisRadius = Math.max(4, Math.hypot(bx - ax, by - ay) * 0.18);
+  // Vertical eye axis: perpendicular to the corner axis, through the iris.
+  // This is the vertical counterpart to the horizontal corner line and marks
+  // the iris/pupil vertical position.
+  if (eyeWidth > 0) {
+    const vx = -(by - ay) / eyeWidth;
+    const vy = (bx - ax) / eyeWidth;
+    const half = eyeWidth * 0.5;
+    ctx.strokeStyle = COLOURS.marker;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(ix - vx * half, iy - vy * half);
+    ctx.lineTo(ix + vx * half, iy + vy * half);
+    ctx.stroke();
+  }
+
+  const irisRadius = Math.max(4, eyeWidth * 0.18);
   ctx.fillStyle = COLOURS.marker;
   ctx.beginPath();
   ctx.arc(ix, iy, irisRadius, 0, Math.PI * 2);

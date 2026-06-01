@@ -83,6 +83,8 @@ export interface OverlayLandmarks {
   leftEye?: OverlayEye;
   /** Eye on the participant's right. */
   rightEye?: OverlayEye;
+  /** Head/eye centre (nasion) in normalised image coordinates, for centring and head tracking. */
+  faceCentre?: { x: number; y: number };
 }
 
 export type EyeSelectionMode = 'left' | 'right' | 'binocular' | 'both';

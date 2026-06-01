@@ -52,6 +52,9 @@ describe('MediaPipeFaceLandmarkerBackend (smoke)', () => {
     expect(result.leftEye?.irisCentre).toBeDefined();
     expect(result.headPose).toBeDefined();
     expect(typeof result.backendLatencyMs).toBe('number');
+    // Overlay landmark hints for the on-screen overlay (never exported to CSV).
+    expect(result.overlayLandmarks?.leftEye?.iris).toBeDefined();
+    expect(result.overlayLandmarks?.faceCentre).toBeDefined();
     await backend.dispose();
   });
 
