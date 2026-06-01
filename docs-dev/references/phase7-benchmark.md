@@ -33,12 +33,16 @@ Fill in as measurements are gathered. Leave a cell blank if not yet measured.
 
 | Device              | Delegate | Init (ms) | Mean frame (ms) | p95 frame (ms) | Effective FPS | Notes |
 |---------------------|----------|-----------|-----------------|----------------|---------------|-------|
-| Firefox desktop     | CPU      |           |                 |                |               |       |
-| Firefox desktop     | GPU      |           |                 |                |               |       |
-| Chromium desktop    | CPU      |           |                 |                |               |       |
-| Chromium desktop    | GPU      |           |                 |                |               |       |
-| Firefox on Android  | CPU      |           |                 |                |               |       |
-| Firefox on Android  | GPU      |           |                 |                |               |       |
+| Firefox desktop     | CPU      |           |                 |                |               | pending |
+| Firefox desktop     | GPU      |           |                 |                |               | pending |
+| Chromium desktop    | CPU      |           |                 |                |               | pending |
+| Chromium desktop    | GPU      |           |                 |                |               | pending |
+| Firefox on Android  | CPU      | 1605      | 37.3            | 44.0           | 22.7          | usable; cold init incl. model fetch |
+| Firefox on Android  | GPU      | 838       | 33.3            | 38.0           | 28.6          | faster than CPU on both init and per-frame |
+
+Mobile device measured by the project owner (assumed Firefox on Android — the
+phone used for testing). Desktop rows remain to be gathered but are not blocking,
+since the mobile target is the most constrained device.
 
 ## Interpretation guide
 

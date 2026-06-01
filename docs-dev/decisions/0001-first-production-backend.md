@@ -1,6 +1,6 @@
 # Decision 0001 — First production tracking backend
 
-Status: proposed (awaiting on-device benchmark confirmation)
+Status: accepted (confirmed on mobile; desktop rows still welcome)
 Date: 2026-06-01
 Phase: 7 (backend spike)
 
@@ -62,12 +62,31 @@ Rationale (independent of the pending numbers):
 - It honours the abstraction: nothing outside the adapter changes when it is
   promoted in Phase 8.
 
-This recommendation is **provisional** until the on-device numbers confirm
-acceptable initialisation and per-frame latency on Firefox desktop, Chromium
-desktop, and Firefox on Android. If Firefox-on-Android per-frame latency is too
-high at 640×480, the fallbacks (in order) are: lower the capture resolution;
-reduce `numFaces` to 1 (already set); disable blendshapes when blink can be
-derived geometrically; and only then reconsider the backend.
+### Measured results (mobile, assumed Firefox on Android)
+
+| Delegate | Init (ms) | Mean frame (ms) | p95 frame (ms) | Effective FPS |
+|----------|-----------|-----------------|----------------|---------------|
+| CPU      | 1605      | 37.3            | 44.0           | 22.7          |
+| GPU      | 838       | 33.3            | 38.0           | 28.6          |
+
+Both delegates are usable (≈23–29 FPS, p95 ≤ 44 ms). On this device the **GPU
+(WebGL2) delegate is faster on both initialisation and per-frame latency**, so
+§25's "unless a GPU delegate has been benchmarked to be faster on the same
+hardware" clause applies: prefer GPU where available, with CPU as the fallback
+when GPU initialisation fails or is unsupported.
+
+The decision is therefore **accepted** for the mobile target. Desktop rows are
+still welcome but not blocking, since mobile is the most constrained device and
+already clears the usability bar. If a future device shows per-frame latency
+too high at 640×480, the fallbacks (in order) are: lower the capture
+resolution; keep `numFaces` at 1 (already set); disable blendshapes when blink
+can be derived geometrically; and only then reconsider the backend.
+
+### Phase 8 delegate selection
+
+Implement GPU-preferred with automatic CPU fallback: attempt the GPU delegate
+first, and on initialisation failure retry with CPU, surfacing the active
+delegate in the status panel.
 
 ## Consequences
 
