@@ -15,7 +15,7 @@ States: `not started`, `in progress`, `done`, `blocked`.
 | 6     | 06_tasks_and_export.md                       | done        | 195a585 |
 | 7     | 07_backend_spike.md                          | done        | 41e3c04 |
 | 8     | 08_production_backend_and_gaze_mapping.md    | done        | dfc9b63 |
-| 9     | 09_documentation.md                          | done        | TBD    |
+| 9     | 09_documentation.md                          | done        | ededc18 |
 
 The `Commit` column holds the short SHA of the commit that marked the phase
 done. For a phase still in progress, leave it as `—`. For a blocked phase, add
