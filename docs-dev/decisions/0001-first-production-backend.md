@@ -62,31 +62,45 @@ Rationale (independent of the pending numbers):
 - It honours the abstraction: nothing outside the adapter changes when it is
   promoted in Phase 8.
 
-### Measured results (mobile, assumed Firefox on Android)
+### Measured results (mobile)
+
+Firefox on Android:
 
 | Delegate | Init (ms) | Mean frame (ms) | p95 frame (ms) | Effective FPS |
 |----------|-----------|-----------------|----------------|---------------|
 | CPU      | 1605      | 37.3            | 44.0           | 22.7          |
 | GPU      | 838       | 33.3            | 38.0           | 28.6          |
 
-Both delegates are usable (≈23–29 FPS, p95 ≤ 44 ms). On this device the **GPU
-(WebGL2) delegate is faster on both initialisation and per-frame latency**, so
-§25's "unless a GPU delegate has been benchmarked to be faster on the same
-hardware" clause applies: prefer GPU where available, with CPU as the fallback
-when GPU initialisation fails or is unsupported.
+Chrome on Android:
 
-The decision is therefore **accepted** for the mobile target. Desktop rows are
-still welcome but not blocking, since mobile is the most constrained device and
-already clears the usability bar. If a future device shows per-frame latency
-too high at 640×480, the fallbacks (in order) are: lower the capture
-resolution; keep `numFaces` at 1 (already set); disable blendshapes when blink
-can be derived geometrically; and only then reconsider the backend.
+| Delegate | Init (ms) | Mean frame (ms) | p95 frame (ms) | Effective FPS |
+|----------|-----------|-----------------|----------------|---------------|
+| CPU      | 1052      | 33.2            | 35.6           | 27.7          |
+| GPU      | 415       | 34.1            | 31.7           | 23.2          |
+
+All four configurations are usable (≈23–29 FPS, p95 ≤ 44 ms). The best delegate
+is browser-dependent:
+
+- **Firefox on Android**: GPU is clearly better on every metric.
+- **Chrome on Android**: close — CPU gives marginally higher sustained FPS,
+  GPU gives much faster initialisation and a lower p95 (steadier frames).
+
+The decision is **accepted** for the mobile targets. Desktop rows are still
+welcome but not blocking. If a future device shows per-frame latency too high at
+640×480, the fallbacks (in order) are: lower the capture resolution; keep
+`numFaces` at 1 (already set); disable blendshapes when blink can be derived
+geometrically; and only then reconsider the backend.
 
 ### Phase 8 delegate selection
 
-Implement GPU-preferred with automatic CPU fallback: attempt the GPU delegate
-first, and on initialisation failure retry with CPU, surfacing the active
-delegate in the status panel.
+Because the optimal delegate is browser-dependent and the gap is small on
+Chrome, implement: **GPU-preferred with automatic CPU fallback** (attempt GPU
+first; on initialisation failure retry with CPU), **plus a manual delegate
+override** in the UI so a user can pick CPU where it suits their browser. The
+active delegate is surfaced in the status panel. GPU-preferred is the sensible
+automatic default because it gives the fastest initialisation on both browsers
+and the lowest p95 (the metric that governs how steady the overlay feels), and
+it is the clear winner on Firefox, the priority browser (§25).
 
 ## Consequences
 

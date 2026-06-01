@@ -39,10 +39,17 @@ Fill in as measurements are gathered. Leave a cell blank if not yet measured.
 | Chromium desktop    | GPU      |           |                 |                |               | pending |
 | Firefox on Android  | CPU      | 1605      | 37.3            | 44.0           | 22.7          | usable; cold init incl. model fetch |
 | Firefox on Android  | GPU      | 838       | 33.3            | 38.0           | 28.6          | faster than CPU on both init and per-frame |
+| Chrome on Android   | CPU      | 1052      | 33.2            | 35.6           | 27.7          | best sustained FPS on Chrome |
+| Chrome on Android   | GPU      | 415       | 34.1            | 31.7           | 23.2          | fastest init and lowest p95 on Chrome |
 
-Mobile device measured by the project owner (assumed Firefox on Android — the
-phone used for testing). Desktop rows remain to be gathered but are not blocking,
-since the mobile target is the most constrained device.
+Mobile devices measured by the project owner. Desktop rows remain to be gathered
+but are not blocking, since the mobile targets are the most constrained devices
+and all four configurations above clear the usability bar.
+
+Reading: on Firefox Android the GPU delegate is clearly better on every metric.
+On Chrome Android the two are close — CPU gives marginally higher sustained FPS,
+while GPU gives much faster initialisation and a lower p95 (steadier frames).
+The optimal delegate is therefore browser-dependent.
 
 ## Interpretation guide
 
