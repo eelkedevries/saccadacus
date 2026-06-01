@@ -27,3 +27,21 @@ Claude Code reads this file at session start. All operating rules live in
 - When a section of `PROPOSAL.md` and a prompt file disagree, the prompt file
   wins for that task. Note the discrepancy in section 3 of the final overview
   so the proposal can be reconciled.
+
+---
+
+## Known proposal/prompt divergences
+
+Recorded per the rule above, for later reconciliation of `PROPOSAL.md`:
+
+- **Commit-and-push wording.** Every prompt's final step reads "Commit directly
+  to the main branch and push to origin/main. Do not create, switch to, or work
+  on a feature branch for this task." `PROPOSAL.md` §30 and `AGENTS.md`
+  ("Commit and push policy") express the same intent more briefly ("Push to
+  main"; commit message = prompt filename without `.md`). The prompt wording is
+  authoritative for execution; the two are consistent in intent.
+- **Self-hosting model assets.** Decision 0001 records that the production
+  MediaPipe backend should self-host the wasm and `.task` assets in Phase 8. The
+  current implementation loads them from a CDN at runtime; self-hosting remains
+  an open hardening task. This does not affect the static-site or no-upload
+  constraints, since the fetch is the user's browser pulling a public model.

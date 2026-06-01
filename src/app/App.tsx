@@ -7,6 +7,7 @@ import { QualityCheckPanel } from './panels/QualityCheckPanel';
 import { FollowTheDotsPanel } from './panels/FollowTheDotsPanel';
 import { MappedSignalSwitch } from './panels/MappedSignalSwitch';
 import { ExportPanel } from './panels/ExportPanel';
+import { HelpPanel } from './panels/HelpPanel';
 
 export function App(): ReactElement {
   return (
@@ -30,6 +31,7 @@ export function App(): ReactElement {
           <FollowTheDotsPanel />
           <MappedSignalSwitch />
           <ExportPanel />
+          <HelpPanel />
         </div>
         <StatusPanel />
       </div>
