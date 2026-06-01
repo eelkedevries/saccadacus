@@ -3,6 +3,9 @@ import { TrackingModeSwitch } from './panels/TrackingModeSwitch';
 import { EyeSelectionSwitch } from './panels/EyeSelectionSwitch';
 import { StatusPanel } from './panels/StatusPanel';
 import { LiveView } from './panels/LiveView';
+import { QualityCheckPanel } from './panels/QualityCheckPanel';
+import { FollowTheDotsPanel } from './panels/FollowTheDotsPanel';
+import { ExportPanel } from './panels/ExportPanel';
 
 export function App(): ReactElement {
   return (
@@ -22,6 +25,9 @@ export function App(): ReactElement {
             <EyeSelectionSwitch />
           </div>
           <LiveView />
+          <QualityCheckPanel />
+          <FollowTheDotsPanel />
+          <ExportPanel />
         </div>
         <StatusPanel />
       </div>

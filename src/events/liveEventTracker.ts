@@ -63,10 +63,11 @@ export class LiveEventTracker {
     valid: false,
   };
 
-  private lastSaccadeOffsetMs = Number.NEGATIVE_INFINITY;
-  private lastBlinkOffsetMs = Number.NEGATIVE_INFINITY;
-  saccadeCount = 0;
-  blinkCount = 0;
+  // Completed events are deduped by onset timestamp, so an in-progress event
+  // whose offset grows across frames is updated in place rather than counted
+  // again.
+  private readonly saccadeByOnset = new Map<number, SaccadeEvent>();
+  private readonly blinkByOnset = new Map<number, BlinkEvent>();
 
   constructor(options: LiveEventTrackerOptions = {}) {
     this.windowMs = options.windowMs ?? 10_000;
@@ -128,7 +129,8 @@ export class LiveEventTracker {
     });
     const blinks = detectBlinks(this.blinkSamples);
 
-    this.countNew(saccades, blinks);
+    for (const s of saccades) this.saccadeByOnset.set(s.onsetMs, s);
+    for (const b of blinks) this.blinkByOnset.set(b.onsetMs, b);
 
     return {
       saccades,
@@ -138,19 +140,22 @@ export class LiveEventTracker {
     };
   }
 
-  private countNew(saccades: SaccadeEvent[], blinks: BlinkEvent[]): void {
-    for (const s of saccades) {
-      if (s.offsetMs > this.lastSaccadeOffsetMs) {
-        this.saccadeCount += 1;
-        this.lastSaccadeOffsetMs = s.offsetMs;
-      }
-    }
-    for (const b of blinks) {
-      if (b.offsetMs > this.lastBlinkOffsetMs) {
-        this.blinkCount += 1;
-        this.lastBlinkOffsetMs = b.offsetMs;
-      }
-    }
+  get saccadeCount(): number {
+    return this.saccadeByOnset.size;
+  }
+
+  get blinkCount(): number {
+    return this.blinkByOnset.size;
+  }
+
+  /** All completed saccades seen this session, ordered by onset. */
+  getCompletedSaccades(): SaccadeEvent[] {
+    return [...this.saccadeByOnset.values()].sort((a, b) => a.onsetMs - b.onsetMs);
+  }
+
+  /** All completed blinks seen this session, ordered by onset. */
+  getCompletedBlinks(): BlinkEvent[] {
+    return [...this.blinkByOnset.values()].sort((a, b) => a.onsetMs - b.onsetMs);
   }
 
   private trim(nowMs: number): void {
@@ -163,10 +168,8 @@ export class LiveEventTracker {
     this.saccadeSamples = [];
     this.blinkSamples = [];
     this.prev = { x: 0, y: 0, tsMs: 0, yawDeg: 0, pitchDeg: 0, rollDeg: 0, valid: false };
-    this.lastSaccadeOffsetMs = Number.NEGATIVE_INFINITY;
-    this.lastBlinkOffsetMs = Number.NEGATIVE_INFINITY;
-    this.saccadeCount = 0;
-    this.blinkCount = 0;
+    this.saccadeByOnset.clear();
+    this.blinkByOnset.clear();
   }
 }
 

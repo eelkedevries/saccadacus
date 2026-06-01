@@ -19,6 +19,7 @@ import type { EventBand } from '../visualisation/eventMarkers';
 import { SignalChannel } from '../signals/signalPipeline';
 import { LiveEventTracker } from '../events/liveEventTracker';
 import { createAggregateThrottle, useUiStore } from '../state/uiStore';
+import { clearSessionRegistry, sessionRegistry } from './sessionRegistry';
 
 export function canvasContextAvailable(): boolean {
   if (typeof document === 'undefined') return false;
@@ -47,6 +48,8 @@ export function useLiveSession(
     let cancelled = false;
 
     store.setTrackingStatus('tracking');
+    sessionRegistry.pipeline = session.pipeline;
+    sessionRegistry.tracker = tracker;
 
     const run = (): void => {
       if (tracesRef.current) {
@@ -69,6 +72,7 @@ export function useLiveSession(
         const tsMs = performance.now();
         void session.step(tsMs).then(({ result, summary }) => {
           if (cancelled) return;
+          sessionRegistry.latestResult = result;
           const events = tracker.ingest(result);
           bands = [...saccadesToBands(events.saccades), ...blinksToBands(events.blinks)];
           const ctx = overlayRef.current?.getContext('2d');
@@ -101,6 +105,7 @@ export function useLiveSession(
       cancelled = true;
       cancelAnimationFrame(rafHandle);
       traces?.destroy();
+      clearSessionRegistry();
       useUiStore.getState().setTrackingStatus('idle');
       void session.dispose();
     };

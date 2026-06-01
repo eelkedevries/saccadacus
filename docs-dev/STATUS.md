@@ -12,7 +12,7 @@ States: `not started`, `in progress`, `done`, `blocked`.
 | 3     | 03_camera_and_frame_loop.md                  | done        | c3a7851 |
 | 4     | 04_signals_and_rendering.md                  | done        | 8875dde |
 | 5     | 05_events.md                                 | done        | ab9a863 |
-| 6     | 06_tasks_and_export.md                       | not started | —      |
+| 6     | 06_tasks_and_export.md                       | done        | TBD    |
 | 7     | 07_backend_spike.md                          | not started | —      |
 | 8     | 08_production_backend_and_gaze_mapping.md    | not started | —      |
 | 9     | 09_documentation.md                          | not started | —      |
