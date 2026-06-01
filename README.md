@@ -96,22 +96,26 @@ shown and exported; gaze mapping is an additional output, not a replacement.
 
 ## Exporting data
 
-**Export CSV files** downloads two CSV files to your device. Both have one row
-per time point:
+The export panel saves CSV files to your device. You can export each file
+separately, or all at once with **Export all**:
 
-- `primary_output_<mode>_<timestamp>.csv` — a streamlined per-time-point file
-  scoped to the active tracking mode. Columns: `timestamp`, `eye_x`, `eye_y`,
-  `eye_p`, `saccade_event` (`1` while a saccade is ongoing), `saccade_direction`
-  (in degrees, only on the first sample of each saccade), `saccade_magnitude`
-  (only on the first sample), `blink` (`1` while a blink is ongoing), and
+- `primary_output_<mode>_<timestamp>.csv` — one row per time point, scoped to the
+  active tracking mode. Columns: `timestamp`, `eye_x`, `eye_y`, `eye_p`,
+  `saccade_event` (`1` while a saccade is ongoing), `saccade_direction` (in
+  degrees, only on the first sample of each saccade), `saccade_magnitude` (only
+  on the first sample), `blink` (`1` while a blink is ongoing), and
   `tracking_mode` (e.g. `iris_binocular`).
 - `secondary_output_<timestamp>.csv` — the full dataset: per-time-point rows
   carrying every recorded signal (left/right/binocular eye-local position and
   reliability, head pose, gaze-mapped output, camera settings) with event and
   dot information folded onto the same time axis.
+- `events_<timestamp>.csv` — one row per detected event: saccades (onset, offset,
+  duration, direction, magnitude) and blinks (onset, offset, duration), sorted
+  by onset.
 
-Both files share the same `performance.now()` time axis, so they are aligned.
-Raw landmark coordinates are never exported. See
+The per-time-point files share the same `performance.now()` time axis, so they
+are aligned with the event onsets/offsets. Raw landmark coordinates are never
+exported. See
 [`docs-dev/references/csv-columns.md`](docs-dev/references/csv-columns.md) for
 the full column reference.
 

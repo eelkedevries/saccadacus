@@ -278,3 +278,55 @@ export function buildSecondaryCsv(input: SessionExportInputV2): string {
 
 export const PRIMARY_HEADER = header(PRIMARY_COLUMNS);
 export const SECONDARY_HEADER = header(SECONDARY_COLUMNS);
+
+const EVENTS_COLUMNS = [
+  'event_type',
+  'onset_timestamp',
+  'offset_timestamp',
+  'duration_ms',
+  'direction_deg',
+  'magnitude',
+] as const;
+
+/**
+ * One event per row: saccades (with direction and magnitude) and blinks
+ * (direction and magnitude left empty), sorted by onset.
+ */
+export function buildEventsCsv(input: SessionExportInputV2): string {
+  interface Row {
+    onsetMs: number;
+    cells: string[];
+  }
+  const rows: Row[] = [];
+  for (const s of input.saccades) {
+    rows.push({
+      onsetMs: s.onsetMs,
+      cells: [
+        'saccade',
+        formatNumber(s.onsetMs),
+        formatNumber(s.offsetMs),
+        formatNumber(s.durationMs),
+        formatNumber(directionToDegrees(s.direction)),
+        formatNumber(s.relativeAmplitude),
+      ],
+    });
+  }
+  for (const b of input.blinks) {
+    rows.push({
+      onsetMs: b.onsetMs,
+      cells: [
+        'blink',
+        formatNumber(b.onsetMs),
+        formatNumber(b.offsetMs),
+        formatNumber(b.durationMs),
+        '',
+        '',
+      ],
+    });
+  }
+  rows.sort((a, b) => a.onsetMs - b.onsetMs);
+  return [header(EVENTS_COLUMNS), ...rows.map((r) => r.cells.join(','))].join('\n');
+}
+
+export const EVENTS_HEADER = header(EVENTS_COLUMNS);
+

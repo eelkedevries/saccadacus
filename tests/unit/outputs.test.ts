@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildPrimaryCsv, buildSecondaryCsv } from '../../src/export/outputs';
+import { buildEventsCsv, buildPrimaryCsv, buildSecondaryCsv } from '../../src/export/outputs';
 import type { TimeseriesSample } from '../../src/export/sessionExport';
 import type { SaccadeEvent, BlinkEvent } from '../../src/tracking/TrackingBackend';
 import type { DotRecord } from '../../src/tasks/followTheDots/followTheDotsController';
@@ -222,5 +222,43 @@ describe('buildSecondaryCsv', () => {
     for (const row of lines(csv).slice(1)) {
       expect(Number(row.split(',')[idx])).toBe(640);
     }
+  });
+});
+
+describe('buildEventsCsv', () => {
+  const input = {
+    timeseries: [],
+    saccades: [saccade],
+    blinks: [blink],
+    dots: [] as DotRecord[],
+    trackingMode: 'iris' as const,
+    eyeSelectionMode: 'binocular' as const,
+  };
+
+  it('emits the prescribed header', () => {
+    expect(lines(buildEventsCsv(input))[0]).toBe(
+      'event_type,onset_timestamp,offset_timestamp,duration_ms,direction_deg,magnitude',
+    );
+  });
+
+  it('emits one row per event, sorted by onset', () => {
+    const all = lines(buildEventsCsv(input));
+    expect(all).toHaveLength(3); // header + saccade + blink
+    expect((all[1] as string).split(',')[0]).toBe('saccade'); // onset 100
+    expect((all[2] as string).split(',')[0]).toBe('blink'); // onset 200
+  });
+
+  it('fills direction and magnitude for saccades only', () => {
+    const all = lines(buildEventsCsv(input));
+    const sac = (all[1] as string).split(',');
+    const bli = (all[2] as string).split(',');
+    expect(Number(sac[1])).toBe(100); // onset
+    expect(Number(sac[2])).toBe(150); // offset
+    expect(Number(sac[3])).toBe(50); // duration
+    expect(Number(sac[4])).toBeCloseTo(0); // direction 0 deg
+    expect(Number(sac[5])).toBeCloseTo(0.3); // magnitude
+    expect(bli[4]).toBe(''); // blink direction empty
+    expect(bli[5]).toBe(''); // blink magnitude empty
+    expect(Number(bli[3])).toBe(50); // blink duration
   });
 });

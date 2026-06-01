@@ -39,12 +39,22 @@ describe('ExportPanel control', () => {
     clearSessionRegistry();
   });
 
-  it('exports primary and secondary CSV files and reports ready status', async () => {
+  it('exports all three CSV files and reports ready status', async () => {
     const user = userEvent.setup();
     render(<ExportPanel />);
-    await user.click(screen.getByRole('button', { name: /export csv files/i }));
+    await user.click(screen.getByRole('button', { name: /export all/i }));
     await waitFor(() => {
-      expect(clickSpy).toHaveBeenCalledTimes(2);
+      expect(clickSpy).toHaveBeenCalledTimes(3);
+      expect(screen.getByText(/Status: ready/)).toBeInTheDocument();
+    });
+  });
+
+  it('exports a single file when its dedicated button is used', async () => {
+    const user = userEvent.setup();
+    render(<ExportPanel />);
+    await user.click(screen.getByRole('button', { name: /export events/i }));
+    await waitFor(() => {
+      expect(clickSpy).toHaveBeenCalledTimes(1);
       expect(screen.getByText(/Status: ready/)).toBeInTheDocument();
     });
   });

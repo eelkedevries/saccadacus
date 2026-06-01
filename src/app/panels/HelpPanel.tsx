@@ -66,10 +66,11 @@ export function HelpPanel(): ReactElement {
             <div>
               <dt className="font-medium">Export</dt>
               <dd>
-                Download two CSV files: <code>primary_output</code> (one row per
-                time point, scoped to the active tracking mode) and
-                <code> secondary_output</code> (the full dataset). Both stay on
-                your device.
+                Export each file separately or all at once:
+                <code> primary_output</code> (one row per time point, scoped to the
+                active tracking mode), <code>secondary_output</code> (the full
+                dataset), and <code>events</code> (one row per saccade or blink).
+                All stay on your device.
               </dd>
             </div>
           </dl>

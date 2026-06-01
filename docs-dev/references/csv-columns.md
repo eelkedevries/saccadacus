@@ -1,11 +1,13 @@
 # CSV column reference
 
-The export produces **two CSV files**, both with one row per time point:
+The export produces up to **three CSV files**, exportable separately or all at
+once:
 
-- `primary_output_<mode>_<timestamp>.csv` — a streamlined per-time-point file
-  scoped to the active tracking mode.
-- `secondary_output_<timestamp>.csv` — the full dataset, per-time-point, with
-  event and dot information folded onto the same time axis.
+- `primary_output_<mode>_<timestamp>.csv` — one row per time point, scoped to the
+  active tracking mode.
+- `secondary_output_<timestamp>.csv` — the full dataset, one row per time point,
+  with event and dot information folded onto the same time axis.
+- `events_<timestamp>.csv` — one row per detected event (saccade or blink).
 
 All data is local to the browser and saved to your device on download. Raw
 landmark coordinates are never exported.
@@ -68,6 +70,19 @@ Columns (in order):
 | `camera_actual_width_px` | Actual camera width, from `getSettings()`. |
 | `camera_actual_height_px` | Actual camera height. |
 | `camera_actual_frame_rate_hz` | Actual camera frame rate. |
+
+## `events`
+
+One row per detected event, sorted by onset. Columns (in order):
+
+| Column | Meaning |
+|--------|---------|
+| `event_type` | `saccade` or `blink`. |
+| `onset_timestamp` | Event onset, `performance.now()` milliseconds. |
+| `offset_timestamp` | Event offset, milliseconds. |
+| `duration_ms` | Event duration, milliseconds. |
+| `direction_deg` | Saccade direction in degrees (0 = participant's right, 90 = up); empty for blinks. |
+| `magnitude` | Saccade amplitude in eye-width units; empty for blinks. |
 
 ## Notes
 
