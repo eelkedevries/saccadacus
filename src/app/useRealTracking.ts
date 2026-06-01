@@ -139,14 +139,24 @@ export function useRealTracking(
               const summary = pipeline.ingest(frameResult);
               const events = tracker.ingest(frameResult);
               bands = [...saccadesToBands(events.saccades), ...blinksToBands(events.blinks)];
-              const octx = overlayRef.current?.getContext('2d');
-              if (octx && overlayRef.current) {
-                drawCameraOverlay(octx, frameResult, {
-                  widthPx: overlayRef.current.width,
-                  heightPx: overlayRef.current.height,
-                });
-              }
               traces?.update();
+              const overlay = overlayRef.current;
+              if (overlay) {
+                // Size the overlay canvas to match the source frame so
+                // normalised landmark coordinates map to visually-aligned
+                // positions when both video and canvas are CSS-scaled together.
+                if (overlay.width !== captureCanvas.width || overlay.height !== captureCanvas.height) {
+                  overlay.width = captureCanvas.width;
+                  overlay.height = captureCanvas.height;
+                }
+                const octx = overlay.getContext('2d');
+                if (octx) {
+                  drawCameraOverlay(octx, frameResult, {
+                    widthPx: overlay.width,
+                    heightPx: overlay.height,
+                  });
+                }
+              }
               if (summary) {
                 throttle({
                   leftReliability: summary.leftReliability,

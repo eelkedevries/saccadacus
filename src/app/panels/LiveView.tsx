@@ -36,17 +36,15 @@ function CameraLiveView(): ReactElement {
 
   return (
     <div className="space-y-3">
-      <div className="relative">
+      <div className="relative w-full">
         <video
           ref={videoRef}
-          className="w-full -scale-x-100 border border-neutral-700"
+          className="block w-full border border-neutral-700"
           muted
           playsInline
         />
         <canvas
           ref={overlayRef}
-          width={480}
-          height={320}
           className="pointer-events-none absolute inset-0 h-full w-full"
           aria-label="Camera overlay"
         />
@@ -60,6 +58,10 @@ function CameraLiveView(): ReactElement {
 export function LiveView(): ReactElement {
   const [mode, setMode] = useState<Mode>('synthetic');
 
+  const toggleCamera = (): void => {
+    setMode((m) => (m === 'camera' ? 'synthetic' : 'camera'));
+  };
+
   return (
     <section className="space-y-3" aria-label="Live view">
       <div className="flex gap-2" role="group" aria-label="Live view source">
@@ -71,9 +73,9 @@ export function LiveView(): ReactElement {
               ? 'border border-blue-500 px-3 py-1 text-sm'
               : 'border border-neutral-600 px-3 py-1 text-sm'
           }
-          onClick={() => setMode('camera')}
+          onClick={toggleCamera}
         >
-          Start camera tracking
+          {mode === 'camera' ? 'Stop camera tracking' : 'Start camera tracking'}
         </button>
         <button
           type="button"

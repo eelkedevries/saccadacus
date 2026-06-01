@@ -62,6 +62,27 @@ export interface TrackingFrameResult {
   rightEye?: EyeFeatureResult;
   headPose?: HeadPoseResult;
   faceReliability: number;
+  /**
+   * Optional overlay-only landmark hints in normalised image coordinates
+   * ([0,1], origin top-left). Used by the on-screen overlay so markers land on
+   * the actual eye; never written to CSV (PROPOSAL.md §14 forbids raw landmark
+   * coordinates in v1 export). Landmark numerics crossing the worker boundary
+   * are permitted (§22).
+   */
+  overlayLandmarks?: OverlayLandmarks;
+}
+
+export interface OverlayEye {
+  cornerA: { x: number; y: number };
+  cornerB: { x: number; y: number };
+  iris: { x: number; y: number };
+}
+
+export interface OverlayLandmarks {
+  /** Eye on the participant's left (viewer's right when the video is unmirrored). */
+  leftEye?: OverlayEye;
+  /** Eye on the participant's right. */
+  rightEye?: OverlayEye;
 }
 
 export type EyeSelectionMode = 'left' | 'right' | 'binocular' | 'both';

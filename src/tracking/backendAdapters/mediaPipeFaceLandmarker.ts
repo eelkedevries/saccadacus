@@ -129,6 +129,11 @@ export class MediaPipeFaceLandmarkerBackend implements TrackingBackend {
       ? decomposeHeadPose({ matrix, reliability: 0.9 })
       : undefined;
 
+    const overlayLandmarks = {
+      leftEye: overlayEye(landmarks, IDX.leftEyeInner, IDX.leftEyeOuter, IDX.leftIris),
+      rightEye: overlayEye(landmarks, IDX.rightEyeOuter, IDX.rightEyeInner, IDX.rightIris),
+    };
+
     return Promise.resolve({
       pageTimestampMs,
       backendLatencyMs,
@@ -136,6 +141,7 @@ export class MediaPipeFaceLandmarkerBackend implements TrackingBackend {
       rightEye,
       ...(headPose ? { headPose } : {}),
       faceReliability: 0.9,
+      overlayLandmarks,
     });
   }
 
@@ -180,6 +186,23 @@ export async function createMediaPipeBackend(
       lastError instanceof Error ? lastError.message : String(lastError)
     }`,
   );
+}
+
+function overlayEye(
+  landmarks: Array<{ x: number; y: number }>,
+  cornerAIdx: number,
+  cornerBIdx: number,
+  irisIdx: number,
+): { cornerA: { x: number; y: number }; cornerB: { x: number; y: number }; iris: { x: number; y: number } } | undefined {
+  const a = landmarks[cornerAIdx];
+  const b = landmarks[cornerBIdx];
+  const iris = landmarks[irisIdx];
+  if (!a || !b || !iris) return undefined;
+  return {
+    cornerA: { x: a.x, y: a.y },
+    cornerB: { x: b.x, y: b.y },
+    iris: { x: iris.x, y: iris.y },
+  };
 }
 
 function eyeFeature(
