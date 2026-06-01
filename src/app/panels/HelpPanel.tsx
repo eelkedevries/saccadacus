@@ -57,13 +57,6 @@ export function HelpPanel(): ReactElement {
               </dd>
             </div>
             <div>
-              <dt className="font-medium">Quality check</dt>
-              <dd>
-                A short functional check of signal direction and reliability. It is
-                not a gaze calibration.
-              </dd>
-            </div>
-            <div>
               <dt className="font-medium">Follow-the-dots</dt>
               <dd>
                 Follow each dot with your eyes. This fits optional gaze mapping to
@@ -73,8 +66,10 @@ export function HelpPanel(): ReactElement {
             <div>
               <dt className="font-medium">Export</dt>
               <dd>
-                Download one combined CSV with time-series, event, and dot rows,
-                distinguished by the row_type column. Data is saved to your device.
+                Download two CSV files: <code>primary_output</code> (one row per
+                time point, scoped to the active tracking mode) and
+                <code> secondary_output</code> (the full dataset). Both stay on
+                your device.
               </dd>
             </div>
           </dl>

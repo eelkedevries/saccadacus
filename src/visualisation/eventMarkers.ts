@@ -17,9 +17,9 @@ export interface EventBand {
 }
 
 const BAND_FILL: Record<MarkerKind, string> = {
-  saccade: 'rgba(30, 136, 229, 0.18)',
-  blink: 'rgba(176, 0, 32, 0.18)',
-  dot: 'rgba(67, 160, 71, 0.18)',
+  saccade: 'rgba(30, 136, 229, 0.35)',
+  blink: 'rgba(176, 0, 32, 0.35)',
+  dot: 'rgba(67, 160, 71, 0.30)',
 };
 
 export function saccadesToBands(events: readonly SaccadeEvent[]): EventBand[] {

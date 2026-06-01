@@ -1,65 +1,80 @@
-# Combined CSV column reference
+# CSV column reference
 
-The export is a single CSV containing three row classes distinguished by
-`row_type`: `timeseries`, `event`, and `dot`. All rows share the
-`performance.now()` time axis in `timestamp_performance_now`, so the streams are
-aligned. Only derived signals are exported — raw landmark coordinates are never
-included. Columns not relevant to a given row class are left empty.
+The export produces **two CSV files**, both with one row per time point:
 
-The canonical column order and the camelCase → snake_case mapping are defined in
-`src/export/schema.ts`. Numbers are written in plain decimal; the event
-direction is encoded as `x;y`.
+- `primary_output_<mode>_<timestamp>.csv` — a streamlined per-time-point file
+  scoped to the active tracking mode.
+- `secondary_output_<timestamp>.csv` — the full dataset, per-time-point, with
+  event and dot information folded onto the same time axis.
 
-## Columns
+All data is local to the browser and saved to your device on download. Raw
+landmark coordinates are never exported.
 
-| Column | Rows | Meaning |
-|--------|------|---------|
-| `timestamp_performance_now` | all | Shared time axis, `performance.now()` milliseconds. |
-| `video_or_frame_timestamp` | timeseries | Frame media time in milliseconds, when available. |
-| `row_type` | all | `timeseries`, `event`, or `dot`. |
-| `tracking_mode` | all | Active tracking mode: `auto`, `iris`, or `pupil`. |
-| `eye_selection_mode` | all | `left`, `right`, `binocular`, or `both`. |
-| `left_eye_x_local` | timeseries | Left eye-local horizontal position, eye-width units (+ = participant's right). |
-| `left_eye_y_local` | timeseries | Left eye-local vertical position (+ = up). |
-| `right_eye_x_local` | timeseries | Right eye-local horizontal position. |
-| `right_eye_y_local` | timeseries | Right eye-local vertical position. |
-| `binocular_x_local` | timeseries | Reliability-weighted binocular horizontal position. |
-| `binocular_y_local` | timeseries | Reliability-weighted binocular vertical position. |
-| `left_eye_reliability` | timeseries | Left-eye selected-signal reliability, 0–1. |
-| `right_eye_reliability` | timeseries | Right-eye selected-signal reliability, 0–1. |
-| `iris_reliability` | timeseries | Iris-signal reliability, 0–1 (when reported). |
-| `pupil_reliability` | timeseries | Pupil-signal reliability, 0–1 (when reported). |
-| `head_yaw` | timeseries | Head yaw in degrees. |
-| `head_pitch` | timeseries | Head pitch in degrees. |
-| `head_roll` | timeseries | Head roll in degrees. |
-| `head_translation_x` | timeseries | Head translation x (when reported). |
-| `head_translation_y` | timeseries | Head translation y (when reported). |
-| `head_translation_z` | timeseries | Head translation z (when reported). |
-| `blink_state` | timeseries | `open`, `closing`, `closed`, `opening`, or `unknown`. |
-| `event_type` | event | `saccade` or `blink`. |
-| `event_onset` | event | Event onset, `performance.now()` milliseconds. |
-| `event_offset` | event | Event offset, milliseconds. |
-| `event_duration` | event | Event duration, milliseconds. |
-| `event_direction` | event | Saccade direction unit vector, encoded `x;y` (eye-local). |
-| `event_relative_amplitude` | event | Saccade amplitude in eye-width units. |
-| `event_confidence` | event | Event confidence, 0–1. |
-| `event_head_motion_label` | event | `saccade_head_still`, `saccade_during_head_movement`, or `uncertain_head_motion`. |
-| `dot_x` | dot | Dot horizontal position, normalised screen coordinate 0–1. |
-| `dot_y` | dot | Dot vertical position, normalised 0–1. |
-| `dot_timestamp` | dot | Dot onset, `performance.now()` milliseconds. |
-| `gaze_x_mapped` | timeseries | Gaze-mapped horizontal screen position, when mapping is available. |
-| `gaze_y_mapped` | timeseries | Gaze-mapped vertical screen position, when mapping is available. |
-| `gaze_mapping_id` | timeseries | Identifier of the active gaze-mapping variant, e.g. `iris_binocular`. |
-| `gaze_mapping_reliability` | timeseries | Fit reliability of the active gaze mapping, 0–1. |
-| `camera_actual_width_px` | timeseries | Actual camera width in pixels, from `getSettings()`. |
-| `camera_actual_height_px` | timeseries | Actual camera height in pixels. |
-| `camera_actual_frame_rate_hz` | timeseries | Actual camera frame rate in hertz. |
+## `primary_output`
+
+Columns (in order):
+
+| Column | Meaning |
+|--------|---------|
+| `timestamp` | Shared time axis, `performance.now()` milliseconds. |
+| `eye_x` | Horizontal eye-local position from the active tracking mode (eye-width units; + = participant's right). |
+| `eye_y` | Vertical eye-local position from the active tracking mode (+ = up). |
+| `eye_p` | Reliability of the active eye signal, 0–1. |
+| `saccade_event` | `1` while a saccade is ongoing at this time point, otherwise `0`. |
+| `saccade_direction` | Direction of the saccade in degrees, 0 = participant's right, 90 = up. Written **only on the first time point** of each saccade; empty otherwise. |
+| `saccade_magnitude` | Saccade amplitude in eye-width units. Written **only on the first time point** of each saccade; `0` otherwise. |
+| `blink` | `1` while a blink is ongoing, otherwise `0`. |
+| `tracking_mode` | The active configuration, e.g. `iris_binocular`. Identical on every row. |
+
+The eye selection used for `eye_x`/`eye_y`/`eye_p` mirrors the eye-selection
+switch in the UI: `left`, `right`, `binocular` (reliability-weighted average),
+or `both` (the more reliable eye each sample). The signal type follows the
+tracking-mode switch; `auto` resolves to iris.
+
+## `secondary_output`
+
+Columns (in order):
+
+| Column | Meaning |
+|--------|---------|
+| `timestamp_performance_now` | Shared time axis, `performance.now()` milliseconds. |
+| `tracking_mode` | Active configuration, e.g. `iris_binocular`. |
+| `eye_selection_mode` | `left`, `right`, `binocular`, or `both`. |
+| `left_eye_x_local` | Left eye-local horizontal position (eye-width units; + = participant's right). |
+| `left_eye_y_local` | Left eye-local vertical position (+ = up). |
+| `right_eye_x_local` | Right eye-local horizontal position. |
+| `right_eye_y_local` | Right eye-local vertical position. |
+| `binocular_x_local` | Reliability-weighted binocular horizontal position. |
+| `binocular_y_local` | Reliability-weighted binocular vertical position. |
+| `left_eye_reliability` | Left-eye selected-signal reliability, 0–1. |
+| `right_eye_reliability` | Right-eye selected-signal reliability, 0–1. |
+| `head_yaw` | Head yaw in degrees. |
+| `head_pitch` | Head pitch in degrees. |
+| `head_roll` | Head roll in degrees. |
+| `saccade_ongoing` | `1` while a saccade is ongoing at this time point, otherwise `0`. |
+| `saccade_onset_direction_deg` | Saccade direction in degrees; written **only on the first time point** of each saccade. |
+| `saccade_onset_magnitude` | Saccade amplitude in eye-width units; written **only on the first time point**. |
+| `saccade_onset_confidence` | Saccade confidence, 0–1; written **only on the first time point**. |
+| `saccade_onset_head_motion_label` | `saccade_head_still`, `saccade_during_head_movement`, or `uncertain_head_motion`; only on the first time point. |
+| `blink_ongoing` | `1` while a blink is ongoing, otherwise `0`. |
+| `blink_onset_confidence` | Blink confidence, 0–1; only on the first time point. |
+| `dot_active` | `1` while a follow-the-dots dot is on screen, otherwise `0`. |
+| `dot_x` | Dot horizontal position, normalised 0–1; written while a dot is active. |
+| `dot_y` | Dot vertical position, normalised 0–1; written while a dot is active. |
+| `gaze_x_mapped` | Gaze-mapped horizontal screen position, when mapping is available. |
+| `gaze_y_mapped` | Gaze-mapped vertical screen position, when mapping is available. |
+| `gaze_mapping_id` | Active gaze-mapping variant id, e.g. `iris_binocular`. |
+| `gaze_mapping_reliability` | Fit reliability of the active gaze mapping, 0–1. |
+| `camera_actual_width_px` | Actual camera width, from `getSettings()`. |
+| `camera_actual_height_px` | Actual camera height. |
+| `camera_actual_frame_rate_hz` | Actual camera frame rate. |
 
 ## Notes
 
-- Event rows carry their onset in both `timestamp_performance_now` and
-  `event_onset` so they sort onto the shared time axis.
-- The eye-local signal is always present even when gaze mapping is available;
-  the `gaze_*` columns are additional, not a replacement.
 - Sign conventions follow the participant's perspective: positive horizontal is
   to the participant's right, positive vertical is up.
+- The eye-local signal is recorded even when gaze mapping is available; the
+  `gaze_*` columns are additional, not a replacement.
+- Empty cells indicate that the column does not apply on that time point (for
+  example, `saccade_onset_*` is filled only on the first sample of each
+  saccade).

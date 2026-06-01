@@ -81,14 +81,6 @@ the active compute delegate, and live event counts. Reliability is reported as a
 percentage; low values mean the corresponding signal should be treated with
 caution.
 
-## Quality check
-
-The quality check is a short functional check — not a gaze calibration. It asks
-you to look left, right, up, and down, blink, hold your head still, and move it
-slightly. From your responses it confirms whether the signal moves in the
-expected directions with enough strength, and indicates whether iris or pupil
-tracking is currently the more reliable choice.
-
 ## Follow-the-dots task
 
 The optional follow-the-dots task presents dots at random positions across the
@@ -104,17 +96,22 @@ shown and exported; gaze mapping is an additional output, not a replacement.
 
 ## Exporting data
 
-**Export combined CSV** downloads a single CSV file to your device. It contains
-three kinds of rows, distinguished by the `row_type` column:
+**Export CSV files** downloads two CSV files to your device. Both have one row
+per time point:
 
-- `timeseries` — the per-frame derived signals (eye-local position, reliability,
-  head pose, and, when available, gaze-mapped position),
-- `event` — detected saccades and blinks with their summaries,
-- `dot` — follow-the-dots task dots with positions and timing.
+- `primary_output_<mode>_<timestamp>.csv` — a streamlined per-time-point file
+  scoped to the active tracking mode. Columns: `timestamp`, `eye_x`, `eye_y`,
+  `eye_p`, `saccade_event` (`1` while a saccade is ongoing), `saccade_direction`
+  (in degrees, only on the first sample of each saccade), `saccade_magnitude`
+  (only on the first sample), `blink` (`1` while a blink is ongoing), and
+  `tracking_mode` (e.g. `iris_binocular`).
+- `secondary_output_<timestamp>.csv` — the full dataset: per-time-point rows
+  carrying every recorded signal (left/right/binocular eye-local position and
+  reliability, head pose, gaze-mapped output, camera settings) with event and
+  dot information folded onto the same time axis.
 
-All rows share the same `performance.now()` time axis
-(`timestamp_performance_now`), so the streams are aligned. Raw landmark
-coordinates are never exported. See
+Both files share the same `performance.now()` time axis, so they are aligned.
+Raw landmark coordinates are never exported. See
 [`docs-dev/references/csv-columns.md`](docs-dev/references/csv-columns.md) for
 the full column reference.
 

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FollowTheDotsPanel } from '../../src/app/panels/FollowTheDotsPanel';
 import { ExportPanel } from '../../src/app/panels/ExportPanel';
@@ -25,11 +25,13 @@ describe('FollowTheDotsPanel lifecycle', () => {
 });
 
 describe('ExportPanel control', () => {
+  let clickSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
     clearSessionRegistry();
     (URL as unknown as { createObjectURL: () => string }).createObjectURL = () => 'blob:test';
     (URL as unknown as { revokeObjectURL: () => void }).revokeObjectURL = () => {};
-    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -37,10 +39,13 @@ describe('ExportPanel control', () => {
     clearSessionRegistry();
   });
 
-  it('exports a combined CSV and reports ready status', async () => {
+  it('exports primary and secondary CSV files and reports ready status', async () => {
     const user = userEvent.setup();
     render(<ExportPanel />);
-    await user.click(screen.getByRole('button', { name: /export combined csv/i }));
-    expect(screen.getByText(/Status: ready/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /export csv files/i }));
+    await waitFor(() => {
+      expect(clickSpy).toHaveBeenCalledTimes(2);
+      expect(screen.getByText(/Status: ready/)).toBeInTheDocument();
+    });
   });
 });
