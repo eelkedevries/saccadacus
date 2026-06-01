@@ -57,7 +57,7 @@ After completing this prompt
   1. Run the relevant tests.
   2. Fix any failures caused by this task.
   3. Update docs-dev/STATUS.md: set Phase 1 to done and record the commit SHA.
-  4. Commit the changes with message: prompt01_scaffold.
+  4. Commit the changes with message: 01_scaffold.
   5. Push to main.
 
 Final overview (mandatory, three parts)
@@ -128,7 +128,7 @@ After completing this prompt
   1. Run the relevant tests.
   2. Fix any failures caused by this task.
   3. Update docs-dev/STATUS.md: Phase 2 -> done with commit SHA.
-  4. Commit with message: prompt02_interfaces_and_mock.
+  4. Commit with message: 02_interfaces_and_mock.
   5. Push to main.
 
 Final overview (mandatory, three parts)
@@ -198,7 +198,7 @@ After completing this prompt
   1. Run the relevant tests.
   2. Fix any failures caused by this task.
   3. Update docs-dev/STATUS.md: Phase 3 -> done with commit SHA.
-  4. Commit with message: prompt03_camera_and_frame_loop.
+  4. Commit with message: 03_camera_and_frame_loop.
   5. Push to main.
 
 Final overview (mandatory, three parts)
@@ -275,7 +275,7 @@ After completing this prompt
   1. Run the relevant tests.
   2. Fix any failures caused by this task.
   3. Update docs-dev/STATUS.md: Phase 4 -> done with commit SHA.
-  4. Commit with message: prompt04_signals_and_rendering.
+  4. Commit with message: 04_signals_and_rendering.
   5. Push to main.
 
 Final overview (mandatory, three parts)
@@ -343,7 +343,7 @@ After completing this prompt
   1. Run the relevant tests.
   2. Fix any failures caused by this task.
   3. Update docs-dev/STATUS.md: Phase 5 -> done with commit SHA.
-  4. Commit with message: prompt05_events.
+  4. Commit with message: 05_events.
   5. Push to main.
 
 Final overview (mandatory, three parts)
@@ -411,7 +411,7 @@ After completing this prompt
   1. Run the relevant tests.
   2. Fix any failures caused by this task.
   3. Update docs-dev/STATUS.md: Phase 6 -> done with commit SHA.
-  4. Commit with message: prompt06_tasks_and_export.
+  4. Commit with message: 06_tasks_and_export.
   5. Push to main.
 
 Final overview (mandatory, three parts)
@@ -476,7 +476,7 @@ After completing this prompt
   2. Fix any failures caused by this task.
   3. Update docs-dev/STATUS.md: Phase 7 -> done with commit SHA (note it is a
      spike + decision record).
-  4. Commit with message: prompt07_backend_spike.
+  4. Commit with message: 07_backend_spike.
   5. Push to main.
 
 Final overview (mandatory, three parts)
@@ -547,7 +547,7 @@ After completing this prompt
   1. Run the relevant tests.
   2. Fix any failures caused by this task.
   3. Update docs-dev/STATUS.md: Phase 8 -> done with commit SHA.
-  4. Commit with message: prompt08_production_backend_and_gaze_mapping.
+  4. Commit with message: 08_production_backend_and_gaze_mapping.
   5. Push to main.
 
 Final overview (mandatory, three parts)
@@ -610,7 +610,7 @@ After completing this prompt
   1. Run the relevant tests.
   2. Fix any failures caused by this task.
   3. Update docs-dev/STATUS.md: Phase 9 -> done with commit SHA.
-  4. Commit with message: prompt09_documentation.
+  4. Commit with message: 09_documentation.
   5. Push to main.
 
 Final overview (mandatory, three parts)
