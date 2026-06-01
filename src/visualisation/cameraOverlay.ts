@@ -39,9 +39,6 @@ export function clearOverlay(ctx: CanvasRenderingContext2D, layout: OverlayLayou
   ctx.clearRect(0, 0, layout.widthPx, layout.heightPx);
 }
 
-/** Half-size of the central target box, as a fraction of the frame. */
-const CENTRE_TOLERANCE = 0.18;
-
 export function drawCameraOverlay(
   ctx: CanvasRenderingContext2D,
   result: TrackingFrameResult,
@@ -50,7 +47,6 @@ export function drawCameraOverlay(
   clearOverlay(ctx, layout);
   const landmarks = result.overlayLandmarks;
   if (landmarks) {
-    drawCentringGuide(ctx, layout, landmarks.faceCentre);
     drawLandmarkOverlay(ctx, landmarks, layout);
     if (result.headPose && landmarks.faceCentre) {
       // Anchor the head-pose axes on the head so head tracking follows it.
@@ -89,28 +85,6 @@ function drawLandmarkOverlay(
   }
 }
 
-/** Central target box and crosshair to help the user keep head and eyes centred. */
-function drawCentringGuide(
-  ctx: CanvasRenderingContext2D,
-  layout: OverlayLayout,
-  faceCentre: { x: number; y: number } | undefined,
-): void {
-  const cx = layout.widthPx * 0.5;
-  const cy = layout.heightPx * 0.5;
-  const halfW = layout.widthPx * CENTRE_TOLERANCE;
-  const halfH = layout.heightPx * CENTRE_TOLERANCE;
-  const centred =
-    faceCentre !== undefined &&
-    Math.abs(faceCentre.x - 0.5) <= CENTRE_TOLERANCE &&
-    Math.abs(faceCentre.y - 0.5) <= CENTRE_TOLERANCE;
-
-  ctx.strokeStyle = centred ? COLOURS.cornerRight : COLOURS.text;
-  ctx.lineWidth = 1;
-  ctx.setLineDash([6, 6]);
-  ctx.strokeRect(cx - halfW, cy - halfH, halfW * 2, halfH * 2);
-  ctx.setLineDash([]);
-}
-
 function drawFaceCentre(
   ctx: CanvasRenderingContext2D,
   centre: { x: number; y: number },
@@ -118,8 +92,7 @@ function drawFaceCentre(
 ): void {
   const px = centre.x * layout.widthPx;
   const py = centre.y * layout.heightPx;
-  const centred = Math.abs(centre.x - 0.5) <= CENTRE_TOLERANCE && Math.abs(centre.y - 0.5) <= CENTRE_TOLERANCE;
-  ctx.strokeStyle = centred ? COLOURS.cornerRight : COLOURS.low;
+  ctx.strokeStyle = COLOURS.text;
   ctx.lineWidth = 2;
   const r = 8;
   ctx.beginPath();

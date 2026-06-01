@@ -32,6 +32,7 @@ export function useRealTracking(
   videoRef: RefObject<HTMLVideoElement | null>,
   overlayRef: RefObject<HTMLCanvasElement | null>,
   tracesRef: RefObject<HTMLDivElement | null>,
+  centringWrapperRef?: RefObject<HTMLDivElement | null>,
 ): { message: string } {
   const [message, setMessage] = useState('Starting camera…');
 
@@ -48,6 +49,27 @@ export function useRealTracking(
     const pipeline = new SignalPipeline();
     const tracker = new LiveEventTracker();
     const throttle = createAggregateThrottle((s) => useUiStore.getState().applyAggregate(s));
+    // Smoothed head-centre in normalised image coordinates. The displayed feed
+    // is scaled up and panned so this point lands at the centre of the visible
+    // area, keeping the head and eyes centred. Exponential smoothing prevents
+    // per-frame jitter; clamping keeps the scaled video covering the viewport.
+    const SCALE = 1.3;
+    const SMOOTH = 0.15;
+    let smoothedCentreX = 0.5;
+    let smoothedCentreY = 0.5;
+    const applyCentring = (faceCentre: { x: number; y: number } | undefined): void => {
+      const wrapper = centringWrapperRef?.current;
+      if (!wrapper) return;
+      if (faceCentre) {
+        smoothedCentreX = smoothedCentreX * (1 - SMOOTH) + faceCentre.x * SMOOTH;
+        smoothedCentreY = smoothedCentreY * (1 - SMOOTH) + faceCentre.y * SMOOTH;
+      }
+      const minPct = -100 * (SCALE - 1);
+      const tx = clamp(100 * (0.5 - SCALE * smoothedCentreX), minPct, 0);
+      const ty = clamp(100 * (0.5 - SCALE * smoothedCentreY), minPct, 0);
+      wrapper.style.transform = `translate(${tx}%, ${ty}%) scale(${SCALE})`;
+      wrapper.style.transformOrigin = '0 0';
+    };
     const captureCanvas = document.createElement('canvas');
     const constraints = buildCameraConstraints({
       widthPx: 640,
@@ -172,6 +194,7 @@ export function useRealTracking(
               const summary = pipeline.ingest(frameResult);
               const events = tracker.ingest(frameResult);
               bands = [...saccadesToBands(events.saccades), ...blinksToBands(events.blinks)];
+              applyCentring(frameResult.overlayLandmarks?.faceCentre);
               traces?.update();
               const overlay = overlayRef.current;
               if (overlay) {
@@ -225,7 +248,11 @@ export function useRealTracking(
       useUiStore.getState().setTrackingStatus('idle');
       useUiStore.getState().setActiveDelegate(null);
     };
-  }, [videoRef, overlayRef, tracesRef]);
+  }, [videoRef, overlayRef, tracesRef, centringWrapperRef]);
 
   return { message };
+}
+
+function clamp(value: number, lo: number, hi: number): number {
+  return value < lo ? lo : value > hi ? hi : value;
 }

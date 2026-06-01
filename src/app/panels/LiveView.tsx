@@ -32,22 +32,24 @@ function CameraLiveView(): ReactElement {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const overlayRef = useRef<HTMLCanvasElement | null>(null);
   const tracesRef = useRef<HTMLDivElement | null>(null);
-  const { message } = useRealTracking(videoRef, overlayRef, tracesRef);
+  const centringWrapperRef = useRef<HTMLDivElement | null>(null);
+  const { message } = useRealTracking(videoRef, overlayRef, tracesRef, centringWrapperRef);
 
   return (
     <div className="space-y-3">
-      <div className="relative w-full">
-        <video
-          ref={videoRef}
-          className="block w-full border border-neutral-700"
-          muted
-          playsInline
-        />
-        <canvas
-          ref={overlayRef}
-          className="pointer-events-none absolute inset-0 h-full w-full"
-          aria-label="Camera overlay"
-        />
+      <div className="relative w-full overflow-hidden border border-neutral-700 bg-neutral-950">
+        <div
+          ref={centringWrapperRef}
+          className="relative h-full w-full will-change-transform"
+          style={{ transformOrigin: '0 0' }}
+        >
+          <video ref={videoRef} className="block w-full" muted playsInline />
+          <canvas
+            ref={overlayRef}
+            className="pointer-events-none absolute inset-0 h-full w-full"
+            aria-label="Camera overlay"
+          />
+        </div>
       </div>
       <p className="text-xs text-neutral-400">{message}</p>
       <div ref={tracesRef} className="w-full" aria-label="Eye-local position traces" />
