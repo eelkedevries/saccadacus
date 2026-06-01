@@ -15,6 +15,7 @@ export function StatusPanel(): ReactElement {
   const blinkCount = useUiStore((s) => s.blinkCount);
   const gazeMappingAvailable = useUiStore((s) => s.gazeMappingAvailable);
   const exportStatus = useUiStore((s) => s.exportStatus);
+  const activeDelegate = useUiStore((s) => s.activeDelegate);
 
   return (
     <section className="border border-neutral-700 p-3" aria-label="Status">
@@ -22,6 +23,8 @@ export function StatusPanel(): ReactElement {
       <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
         <dt>Tracking</dt>
         <dd>{trackingStatus}</dd>
+        <dt>Delegate</dt>
+        <dd>{activeDelegate ?? 'n/a'}</dd>
         <dt>Active signal</dt>
         <dd>{activeSelection}</dd>
         <dt>Left eye reliability</dt>

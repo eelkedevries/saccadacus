@@ -11,6 +11,7 @@ import type { LiveEventTracker } from '../events/liveEventTracker';
 import type { DotRecord } from '../tasks/followTheDots/followTheDotsController';
 import type { CameraActualSettingsLite } from '../export/sessionExport';
 import type { TrackingFrameResult } from '../tracking/TrackingBackend';
+import type { GazeMappingService } from '../tasks/gazeMapping/gazeMappingService';
 
 export interface SessionRegistry {
   pipeline?: SignalPipeline;
@@ -18,6 +19,7 @@ export interface SessionRegistry {
   getDots?: () => DotRecord[];
   camera?: CameraActualSettingsLite;
   latestResult?: TrackingFrameResult;
+  gazeMapping?: GazeMappingService;
 }
 
 export const sessionRegistry: SessionRegistry = {};
@@ -28,4 +30,5 @@ export function clearSessionRegistry(): void {
   delete sessionRegistry.getDots;
   delete sessionRegistry.camera;
   delete sessionRegistry.latestResult;
+  delete sessionRegistry.gazeMapping;
 }

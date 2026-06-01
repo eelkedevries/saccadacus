@@ -40,11 +40,20 @@ export interface UiState {
   saccadeCount: number;
   blinkCount: number;
 
+  /** Active tracking delegate, surfaced for the status panel (§25). */
+  activeDelegate: string | null;
+  /** Available gaze-mapping variants and their fit reliability. */
+  gazeVariants: { id: string; reliability: number }[];
+  activeGazeVariant: string | null;
+
   setTrackingMode: (mode: TrackingMode) => void;
   setEyeSelectionMode: (mode: EyeSelectionMode) => void;
   setTrackingStatus: (status: TrackingStatus) => void;
   setExportStatus: (status: ExportStatus) => void;
   setGazeMappingAvailable: (available: boolean) => void;
+  setActiveDelegate: (delegate: string | null) => void;
+  setGazeVariants: (variants: { id: string; reliability: number }[]) => void;
+  setActiveGazeVariant: (id: string | null) => void;
   applyAggregate: (snapshot: AggregateSnapshot) => void;
 }
 
@@ -62,11 +71,18 @@ export const useUiStore = create<UiState>((set) => ({
   saccadeCount: 0,
   blinkCount: 0,
 
+  activeDelegate: null,
+  gazeVariants: [],
+  activeGazeVariant: null,
+
   setTrackingMode: (trackingMode) => set({ trackingMode }),
   setEyeSelectionMode: (eyeSelectionMode) => set({ eyeSelectionMode }),
   setTrackingStatus: (trackingStatus) => set({ trackingStatus }),
   setExportStatus: (exportStatus) => set({ exportStatus }),
   setGazeMappingAvailable: (gazeMappingAvailable) => set({ gazeMappingAvailable }),
+  setActiveDelegate: (activeDelegate) => set({ activeDelegate }),
+  setGazeVariants: (gazeVariants) => set({ gazeVariants }),
+  setActiveGazeVariant: (activeGazeVariant) => set({ activeGazeVariant }),
   applyAggregate: (snapshot) =>
     set({
       leftReliability: snapshot.leftReliability,

@@ -148,6 +148,40 @@ export class MediaPipeFaceLandmarkerBackend implements TrackingBackend {
   }
 }
 
+export interface CreatedBackend {
+  backend: MediaPipeFaceLandmarkerBackend;
+  delegate: Delegate;
+}
+
+/**
+ * Create and initialise the production backend with GPU-preferred, CPU-fallback
+ * delegate selection (Decision 0001). Attempts the GPU (WebGL2) delegate first;
+ * on initialisation failure it retries with the CPU (WASM) delegate. The active
+ * delegate is returned so the UI can surface it (§25).
+ */
+export async function createMediaPipeBackend(
+  config: TrackingBackendConfig,
+  options: Omit<MediaPipeAdapterOptions, 'delegate'> & { preferred?: Delegate } = {},
+): Promise<CreatedBackend> {
+  const order: Delegate[] = options.preferred === 'CPU' ? ['CPU', 'GPU'] : ['GPU', 'CPU'];
+  let lastError: unknown;
+  for (const delegate of order) {
+    const backend = new MediaPipeFaceLandmarkerBackend({ ...options, delegate });
+    try {
+      await backend.initialise(config);
+      return { backend, delegate };
+    } catch (err) {
+      lastError = err;
+      await backend.dispose();
+    }
+  }
+  throw new Error(
+    `MediaPipe backend failed to initialise on any delegate: ${
+      lastError instanceof Error ? lastError.message : String(lastError)
+    }`,
+  );
+}
+
 function eyeFeature(
   landmarks: Array<{ x: number; y: number }>,
   cornerAIdx: number,

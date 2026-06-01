@@ -5,11 +5,12 @@ import { sessionRegistry } from '../sessionRegistry';
 import { buildSessionCsv, extractTimeseries } from '../../export/sessionExport';
 
 export function buildCsvFromRegistry(): string {
-  const { pipeline, tracker, getDots, camera } = sessionRegistry;
+  const { pipeline, tracker, getDots, camera, gazeMapping } = sessionRegistry;
   const { trackingMode, eyeSelectionMode } = useUiStore.getState();
   const timeseries = pipeline
     ? extractTimeseries(pipeline.signalBuffer, pipeline.headBuffer)
     : [];
+  const gaze = gazeMapping?.getActive();
   return buildSessionCsv({
     timeseries,
     saccades: tracker?.getCompletedSaccades() ?? [],
@@ -18,6 +19,7 @@ export function buildCsvFromRegistry(): string {
     trackingMode,
     eyeSelectionMode,
     ...(camera ? { camera } : {}),
+    ...(gaze ? { gaze } : {}),
   });
 }
 

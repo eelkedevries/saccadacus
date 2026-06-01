@@ -5,6 +5,7 @@ import { StatusPanel } from './panels/StatusPanel';
 import { LiveView } from './panels/LiveView';
 import { QualityCheckPanel } from './panels/QualityCheckPanel';
 import { FollowTheDotsPanel } from './panels/FollowTheDotsPanel';
+import { MappedSignalSwitch } from './panels/MappedSignalSwitch';
 import { ExportPanel } from './panels/ExportPanel';
 
 export function App(): ReactElement {
@@ -27,6 +28,7 @@ export function App(): ReactElement {
           <LiveView />
           <QualityCheckPanel />
           <FollowTheDotsPanel />
+          <MappedSignalSwitch />
           <ExportPanel />
         </div>
         <StatusPanel />

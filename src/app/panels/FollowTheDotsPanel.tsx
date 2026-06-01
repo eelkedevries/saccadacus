@@ -4,6 +4,8 @@ import { FollowTheDotsController } from '../../tasks/followTheDots/followTheDots
 import type { DotRecord } from '../../tasks/followTheDots/followTheDotsController';
 import { useUiStore } from '../../state/uiStore';
 import { sessionRegistry } from '../sessionRegistry';
+import { extractTimeseries } from '../../export/sessionExport';
+import { GazeMappingService } from '../../tasks/gazeMapping/gazeMappingService';
 
 const DOT_INTERVAL_MS = 1200;
 
@@ -11,6 +13,10 @@ export function FollowTheDotsPanel(): ReactElement {
   const trackingMode = useUiStore((s) => s.trackingMode);
   const eyeSelectionMode = useUiStore((s) => s.eyeSelectionMode);
   const faceReliability = useUiStore((s) => s.faceReliability);
+  const setGazeVariants = useUiStore((s) => s.setGazeVariants);
+  const setActiveGazeVariant = useUiStore((s) => s.setActiveGazeVariant);
+  const setGazeMappingAvailable = useUiStore((s) => s.setGazeMappingAvailable);
+  const [mappingNote, setMappingNote] = useState<string>('');
 
   const controllerRef = useRef<FollowTheDotsController | null>(null);
   const [running, setRunning] = useState(false);
@@ -46,10 +52,35 @@ export function FollowTheDotsPanel(): ReactElement {
   };
 
   const stop = (): void => {
-    controllerRef.current?.stop(performance.now());
+    const controller = controllerRef.current;
+    controller?.stop(performance.now());
     setRunning(false);
     setActiveDot(undefined);
-    setDotCount(controllerRef.current?.getDots().length ?? 0);
+    setDotCount(controller?.getDots().length ?? 0);
+    fitGazeMapping(controller?.getDots() ?? []);
+  };
+
+  const fitGazeMapping = (dots: DotRecord[]): void => {
+    const pipeline = sessionRegistry.pipeline;
+    if (!pipeline || dots.length < 5) {
+      setMappingNote('Not enough dots to fit gaze mapping (need at least five).');
+      return;
+    }
+    const timeseries = extractTimeseries(pipeline.signalBuffer, pipeline.headBuffer);
+    const service = new GazeMappingService();
+    const variants = service.fit(dots, timeseries);
+    sessionRegistry.gazeMapping = service;
+    const reliable = variants
+      .filter((v) => v.model.reliability > 0)
+      .map((v) => ({ id: v.id, reliability: v.model.reliability }));
+    if (reliable.length === 0) {
+      setMappingNote('Gaze mapping could not be fitted reliably from these dots.');
+      return;
+    }
+    setGazeVariants(reliable);
+    setActiveGazeVariant(reliable[0]!.id);
+    setGazeMappingAvailable(true);
+    setMappingNote(`Gaze mapping fitted: ${reliable.length} variant(s) available.`);
   };
 
   return (
@@ -72,6 +103,7 @@ export function FollowTheDotsPanel(): ReactElement {
           Dots shown: {dotCount}
         </span>
       </div>
+      {mappingNote ? <p className="mt-2 text-xs text-neutral-400">{mappingNote}</p> : null}
 
       {running && activeDot ? (
         <div className="relative mt-3 h-48 border border-neutral-800 bg-neutral-950">

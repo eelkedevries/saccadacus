@@ -15,6 +15,8 @@ import type {
 import { RingBuffer } from '../signals/ringBuffer';
 import { HeadChannel, SignalChannel } from '../signals/signalPipeline';
 import type { DotRecord } from '../tasks/followTheDots/followTheDotsController';
+import { applyGazeMap } from '../tasks/gazeMapping/fitGazeMap';
+import type { GazeVariantModel } from '../tasks/gazeMapping/gazeMappingService';
 import { buildCombinedCsv } from './combinedCsv';
 import type { CombinedRow } from './schema';
 
@@ -47,6 +49,8 @@ export interface SessionExportInput {
   trackingMode: TrackingMode;
   eyeSelectionMode: EyeSelectionMode;
   camera?: CameraActualSettingsLite;
+  /** When gaze mapping is available, the active variant used to map each row. */
+  gaze?: GazeVariantModel;
 }
 
 /**
@@ -126,6 +130,7 @@ export function toCombinedRows(input: SessionExportInput): CombinedRow[] {
       ...(s.headYaw !== undefined ? { headYaw: s.headYaw } : {}),
       ...(s.headPitch !== undefined ? { headPitch: s.headPitch } : {}),
       ...(s.headRoll !== undefined ? { headRoll: s.headRoll } : {}),
+      ...gazeFields(input.gaze, s),
       ...cameraFields(camera),
     });
   }
@@ -174,6 +179,31 @@ export function toCombinedRows(input: SessionExportInput): CombinedRow[] {
   }
 
   return rows;
+}
+
+function gazeFields(
+  gaze: GazeVariantModel | undefined,
+  sample: TimeseriesSample,
+): Partial<CombinedRow> {
+  if (!gaze || gaze.model.reliability <= 0) return {};
+  const local =
+    gaze.eye === 'left'
+      ? { x: sample.leftEyeXLocal, y: sample.leftEyeYLocal }
+      : gaze.eye === 'right'
+        ? { x: sample.rightEyeXLocal, y: sample.rightEyeYLocal }
+        : { x: sample.binocularXLocal, y: sample.binocularYLocal };
+  const mapped = applyGazeMap(gaze.model, {
+    xLocal: local.x,
+    yLocal: local.y,
+    yawDeg: sample.headYaw ?? 0,
+    pitchDeg: sample.headPitch ?? 0,
+  });
+  return {
+    gazeXMapped: mapped.x,
+    gazeYMapped: mapped.y,
+    gazeMappingId: gaze.id,
+    gazeMappingReliability: gaze.model.reliability,
+  };
 }
 
 function cameraFields(camera: CameraActualSettingsLite | undefined): Partial<CombinedRow> {
