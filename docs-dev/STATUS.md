@@ -8,7 +8,7 @@ States: `not started`, `in progress`, `done`, `blocked`.
 | Phase | Prompt                                       | State       | Commit |
 |-------|----------------------------------------------|-------------|--------|
 | 1     | 01_scaffold.md                               | done        | 3882b11 |
-| 2     | 02_interfaces_and_mock.md                    | done        | TBD    |
+| 2     | 02_interfaces_and_mock.md                    | done        | ec66cd7 |
 | 3     | 03_camera_and_frame_loop.md                  | not started | —      |
 | 4     | 04_signals_and_rendering.md                  | not started | —      |
 | 5     | 05_events.md                                 | not started | —      |
