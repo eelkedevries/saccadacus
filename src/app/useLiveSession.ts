@@ -10,7 +10,14 @@ import type { RefObject } from 'react';
 import { MockLiveSession } from './mockLiveSession';
 import { drawCameraOverlay } from '../visualisation/cameraOverlay';
 import { TracesController } from '../visualisation/tracesCanvas';
+import {
+  createEventMarkerPlugin,
+  blinksToBands,
+  saccadesToBands,
+} from '../visualisation/eventMarkers';
+import type { EventBand } from '../visualisation/eventMarkers';
 import { SignalChannel } from '../signals/signalPipeline';
+import { LiveEventTracker } from '../events/liveEventTracker';
 import { createAggregateThrottle, useUiStore } from '../state/uiStore';
 
 export function canvasContextAvailable(): boolean {
@@ -31,10 +38,12 @@ export function useLiveSession(
     if (!canvasContextAvailable()) return;
 
     const session = new MockLiveSession();
+    const tracker = new LiveEventTracker();
     const store = useUiStore.getState();
     const throttle = createAggregateThrottle((s) => useUiStore.getState().applyAggregate(s));
     let rafHandle = 0;
     let traces: TracesController | null = null;
+    let bands: EventBand[] = [];
     let cancelled = false;
 
     store.setTrackingStatus('tracking');
@@ -51,6 +60,7 @@ export function useLiveSession(
             { channel: SignalChannel.BinocularX, label: 'x', stroke: '#1e88e5' },
             { channel: SignalChannel.BinocularY, label: 'y', stroke: '#43a047' },
           ],
+          plugins: [createEventMarkerPlugin(() => bands)],
         });
       }
 
@@ -59,6 +69,8 @@ export function useLiveSession(
         const tsMs = performance.now();
         void session.step(tsMs).then(({ result, summary }) => {
           if (cancelled) return;
+          const events = tracker.ingest(result);
+          bands = [...saccadesToBands(events.saccades), ...blinksToBands(events.blinks)];
           const ctx = overlayRef.current?.getContext('2d');
           if (ctx && overlayRef.current) {
             drawCameraOverlay(ctx, result, {
@@ -73,8 +85,8 @@ export function useLiveSession(
               rightReliability: summary.rightReliability,
               faceReliability: summary.faceReliability,
               activeSelection: 'iris',
-              saccadeCount: 0,
-              blinkCount: 0,
+              saccadeCount: events.saccadeCount,
+              blinkCount: events.blinkCount,
             });
           }
         });

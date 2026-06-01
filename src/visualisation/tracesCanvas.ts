@@ -35,6 +35,7 @@ export interface TracesControllerOptions {
   title: string;
   widthPx: number;
   heightPx: number;
+  plugins?: uPlot.Plugin[];
 }
 
 export class TracesController {
@@ -52,6 +53,7 @@ export class TracesController {
         ...options.series.map((s) => ({ label: s.label, stroke: s.stroke })),
       ],
       scales: { x: { time: false } },
+      ...(options.plugins ? { plugins: options.plugins } : {}),
     };
     const initial = readTraceData(options.buffer, this.channels) as uPlot.AlignedData;
     this.plot = new uPlot(opts, initial, options.container);
