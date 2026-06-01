@@ -55,7 +55,8 @@ After completing this prompt
   2. Fix any failures caused by this task.
   3. Update docs-dev/STATUS.md: set Phase 1 to done and record the commit SHA.
   4. Commit the changes with message: 01_scaffold.
-  5. Push to main.
+  5. Commit directly to the main branch and push to origin/main. Do not
+     create, switch to, or work on a feature branch for this task.
 
 Final overview (mandatory, three parts)
   1. Work completed — what was implemented and whether the full request

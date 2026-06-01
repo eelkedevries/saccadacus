@@ -55,7 +55,8 @@ After completing this prompt
   2. Fix any failures caused by this task.
   3. Update docs-dev/STATUS.md: Phase 6 -> done with commit SHA.
   4. Commit with message: 06_tasks_and_export.
-  5. Push to main.
+  5. Commit directly to the main branch and push to origin/main. Do not
+     create, switch to, or work on a feature branch for this task.
 
 Final overview (mandatory, three parts)
   1. Work completed.
